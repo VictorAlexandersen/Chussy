@@ -1,0 +1,21 @@
+{
+    "listen": "t",
+    "update": "u",
+    "kill": "k",
+    "wait": 30,
+    "pause": 0,
+    "players": 1,
+    "dof": 1,
+    "choices": 2,
+    "use_mouse": false,
+    "buttons": [
+        "1",
+        "2"
+    ],
+    "choice_names": [
+        "1",
+        "2"
+    ],
+    "chaos": true,
+    "hostport": "192.168.8.158:8080"
+}
