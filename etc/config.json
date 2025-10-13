@@ -1,20 +1,26 @@
 {
     "listen": "t",
     "update": "u",
-    "kill": "k",
+    "kill": "q",
     "wait": 30,
     "pause": 0,
     "players": 1,
     "dof": 1,
     "choices": 2,
-    "use_mouse": false,
+    "use_mouse": true,
     "buttons": [
-        "1",
-        "2"
+        [
+            322,
+            838
+        ],
+        [
+            842,
+            633
+        ]
     ],
     "choice_names": [
-        "1",
-        "2"
+        "left",
+        "up"
     ],
     "chaos": true,
     "hostport": "192.168.8.158:8080"

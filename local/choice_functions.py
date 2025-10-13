@@ -106,5 +106,17 @@ def make_choice_and_send_it():
         click_on_choice(chosen)
     else:
         press_choice_button(chosen)
-    print(f"Winner winner, chicken dinner, Mr {chosen}")
-    
+    winnermessage = choose_message(chosen)
+    print(winnermessage)
+
+
+def choose_message(chosen):
+    settings = load_config()
+    with open("etc/winner_messages.json") as message:
+        allMessages = json.load(message)
+        message.close()
+    button = settings["buttons"].index(chosen)
+    choice = random.randint(0, len(allMessages["messages"])-1)
+    choice_message = allMessages["messages"][choice]
+    winnermessage = f"{choice_message[0]}{settings["choice_names"][button]}{choice_message[1]}"
+    return(winnermessage)
