@@ -6,6 +6,8 @@ import time
 import sys
 import requests
 import random
+import psutil
+import threading
 
 #works
 def load_config():
@@ -13,6 +15,57 @@ def load_config():
         settings = json.load(config)
         config.close
         return(settings)
+
+def find_game():
+    settings = load_config()
+    for p in psutil.process_iter(["name"]):
+        if settings["game"].lower() in p.info["name"].lower():
+            return(p)
+    return(None)
+
+_slowmo_running = False
+_slowmo_thread = None
+_force_pause_slowmo = False
+def _slowmo_loop():
+    proc = find_game()
+    if not proc:
+        print("Game not found")
+        return()
+    while _slowmo_running:
+        try:
+            if _force_pause_slowmo:
+                proc.resume()
+                time.sleep(0.01)
+                continue
+            proc.suspend()
+            time.sleep(1-settings_cache["slow"]*settings_cache["smooth"])
+            proc.resume()
+            time.sleep(settings_cache["slow"]*settings_cache["smooth"])
+        except (psutil.NoSuchProcess):
+            print("Game doesnt exist")
+            break
+        except (psutil.AccessDenied):
+            print("Access denied")
+            break
+        try:
+            proc.resume()
+        except:
+            pass
+
+settings_cache = {}
+def start_slowmo():
+    global _slowmo_running, _slowmo_thread
+    settings_cache.update(load_config())
+    _slowmo_running = True
+    _slowmo_thread = threading.Thread(target = _slowmo_loop, daemon = True)
+    _slowmo_thread.start()
+
+def stop_slowmo():
+    global _slowmo_running
+    _slowmo_running = False
+    if _slowmo_thread:
+        _slowmo_thread.join(timeout = 3)
+
 
 def load_list_of_votes():
     with open("etc/votes.json", "r") as config:
@@ -91,21 +144,31 @@ def summerize_votes():
     return(summary)
 
 def make_choice_and_send_it():
+    global _force_pause_slowmo
     settings = load_config()
     if not awaken():
         print("server is not open")
         return()
     print("awoken")
+    if settings["slowmo"]:
+        start_slowmo()
     list_of_votes = collect_votes()
     if settings["chaos"]:
         chosen = chaos_choice(list_of_votes)
     else:
         chosen = sensible_choice(list_of_votes)
     print(summerize_votes())
+    if settings["slowmo"]:
+        _force_pause_slowmo = True
+        time.sleep(0.05)
+    
     if settings["use_mouse"]:
         click_on_choice(chosen)
     else:
         press_choice_button(chosen)
+    if settings["slowmo"]:
+        _force_pause_slowmo = False
+        stop_slowmo()
     winnermessage = choose_message(chosen)
     print(winnermessage)
 

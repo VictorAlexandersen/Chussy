@@ -2,6 +2,10 @@
 Listenbutton                    :   listen
 Update                          :   update
 Kill                            :   kill
+Slowmo                          :   slowmo
+    Game                        :   game
+    Slow amount                 :   slow
+    Smoothness of slow game     :   smooth
 
 Wait                            :   wait
 Pause                           :   pause
@@ -26,31 +30,27 @@ import mouse as gestapo
 import json
 
 while True:
-    print("Skip setup? (y/n)")
-    if input() == "y":
+    if input("Skip setup? (y/n) ") == "y":
         sys.exit()
-    print("Button to start choice")
-    listen = str(input())
-    print("Is this the pause button? (y/n)")
-    if input() == "y":
-        print("How long between unpause to choice press?")
+    listen = str(input("Button to start choice "))
+    if input("Is this the pause button? (y/n) ") == "y":
+        print("How long between unpause to choice press? ")
         pause = int(input())
     else:
         pause = 0
-    print("Button to update server")
-    update = str(input())
-    print("Button to stop program")
-    kill = str(input())
+    update = str(input("Button to update server "))
+    kill = str(input("Button to stop program "))
+    if pause == 0:
+        if input("Slowmotion on? (y/n) ") == "y":
+            game = str(input("Game name lol "))
+            slowmo = True
+            slow = float(input("How much slower (0,1) where low is slow "))
+            smooth = float(input("How smooth (0,1), 0 is smooth but takes more computing "))
+    wait = int(input("How long time to vote in seconds "))
 
-    print("How long time to vote in seconds")
-    wait = int(input())
-
-    print("How many players?")
-    players = int(input())
-    print("How many degrees of freedom? (random votes)")
-    dof = int(input())
-    print("How many choices?")
-    choices = int(input())
+    players = int(input("How many players? "))
+    dof = int(input("How many degrees of freedom? (random votes) "))
+    choices = int(input("How many choices?" ))
     choice_name = []
     buttons = []
 
@@ -88,6 +88,10 @@ while True:
         "kill"          : kill,
         "wait"          : wait,
         "pause"         : pause,
+        "game"          : game,
+        "slowmo"        : slowmo,
+        "slow"          : slow,
+        "smooth"        : smooth,
         "players"       : players,
         "dof"           : dof,
         "choices"       : choices,
