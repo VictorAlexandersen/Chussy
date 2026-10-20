@@ -1,33 +1,39 @@
+import os
+import time
+import traceback
+
 import keyboard
 import choice_functions as cf
-import time
-import sys
+
+
+def log_crash():
+    crash_dir = os.path.join(cf.BASE_DIR, "crashlogs")
+    os.makedirs(crash_dir, exist_ok=True)  # otherwise the crash log itself crashes
+    path = os.path.join(crash_dir, f"CRASH-{time.time()}.txt")
+    with open(path, "w") as crash_log:
+        crash_log.write(traceback.format_exc())  # full traceback, real line numbers
+    return path
+
 
 settings = cf.load_config()
-try:
-    while True:
-        key = keyboard.read_key()
+while True:
+    try:
+        # read_key() fires on key DOWN and key UP, so every press used to
+        # trigger twice. Only react to key-down events.
+        event = keyboard.read_event()
+        if event.event_type != keyboard.KEY_DOWN:
+            continue
+        key = event.name
+
         if key == settings["listen"]:
-            cf.crash()
             cf.make_choice_and_send_it()
-        if key == settings["kill"]:
+        elif key == settings["kill"]:
             cf.kill()
-        if key == settings["update"]:
-            cf.update()
+        elif key == settings["update"]:
+            print(cf.update())
             settings = cf.load_config()
-except Exception as e:
-    crash=["Error on line {}".format(sys.exc_info()[-1].tb_lineno),"\n",e]
-    print(crash)
-    timeX=str(time.time())
-    with open("crashlogs/CRASH-"+timeX+".txt","w") as crashLog:
-        crashLog.write("\n".join(map(str, crash)))
-
-
-"""while True:
-    key = keyboard.read_key()
-    if key==listenbutton:
-        votingprocess()
-    if key == updatebutton:
-        update_settings()
-    if key == exitbutton:
-        exit()"""
+    except Exception:
+        # Log it and keep listening instead of ending the whole program.
+        print("Crashed, log saved to", log_crash())
+        traceback.print_exc()
+        time.sleep(1)  # avoid a tight crash loop

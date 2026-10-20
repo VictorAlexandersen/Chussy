@@ -1,0 +1,213 @@
+\documentclass[a4paper, 11pt]{report}
+\usepackage{tabularx}
+\usepackage{a4wide}
+\usepackage{hyperref}
+\usepackage{color}
+
+\usepackage{graphicx}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Front page
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\thispagestyle{empty}
+\setcounter{page}{0}
+
+\begin{center}
+  \huge
+  \textbf{Introduction to Programming \\
+  with Scientific Applications \\
+  (Spring 2026)} \\[2ex]
+  Final project \\[3ex]
+\end{center}
+\noindent
+\begin{tabularx}{\textwidth}{|c|X|c|}
+\multicolumn{1}{c}{Study ID} & 
+\multicolumn{1}{l}{Name} & 
+\multicolumn{1}{l}{\% contributed} \\
+\hline
+202506358 & Martyna Koncewicz & 33.3\% \\
+\hline
+202504931 & Rebeka Borsikova & 33.3\% \\
+\hline
+202006836 & Victor Alexandersen & 33.3\% \\
+\hline
+\end{tabularx}
+\centerline{max 3 students}
+\\[2ex]
+\noindent
+Briefly state the contributions of each of the group members to the project
+\\
+\begin{tabularx}{\textwidth}{|X|}
+\hline
+% Your comment goes here
+\textit{\color{red}It is mandatory to give a statement if you are 2-3 students in the group}
+\\[3cm]
+\hline 
+\end{tabularx}
+\\[2ex]
+\noindent
+\\
+Declaration on Generative Artificial Intelligence (see \url{https://studerende.au.dk/en/gai})
+\begin{tabularx}{\textwidth}{|X|}
+\hline
+% Your comment goes here
+\textit{\color{red}It is mandatory to give a statement -- also if you did not use GAI}
+\\[3cm]
+\hline 
+\end{tabularx}
+
+
+\vfill
+\noindent
+\textbf{Note on plagiarism} 
+\\[2ex]
+Since the evaluation of the project report and code will be part of the final grade in the course, \textbf{plagiarism in your project handin will be considered cheating at the exam}. Whenever adopting code or text from elsewhere you must state this and give a reference/link to your source. It is perfectly fine to search information and adopt partial solutions from the internet -- actually, this is encouraged -- but always state your source in your handin. Also discussing your problems with your project with other students is perfectly fine, but remember each group should handin their own solution. If you are in doubt if you solution will be very similar to another group because you discussed the details, please put a remark that you have discussed your solution with other groups. For more Aarhus University information on plagiarism, please visit \url{http://library.au.dk/en/students/plagiarism/}.
+
+\newpage
+
+\section*{Introduction}
+
+In this project, we implemented a simple linear classifier to recognize handwritten digits from the MNIST dataset. The dataset consists of grayscale images of size $28 \times 28$, each representing a digit from 0 to 9.
+
+The main goal was to build the model from scratch using only basic Python. This forced us to understand how the underlying operations work.
+
+Although the model is linear and thus relatively simple, it provides a good introduction to how machine learning models operate and training real data.
+
+\vspace{20pt}
+\section*{Implementation}
+
+\subsection*{Data}
+
+The MNIST data is stored in the IDX file format. We implemented functions to read images and labels directly from the binary files. Each image is represented as a $28 \times 28$ grid of values between 0 and 255.
+
+Before using the images, they are converted into vectors of length 784 ($28 \times 28$) and normalized to the range $[0, 1]$. This makes the values easier to work with during training.
+
+\subsection*{Model}
+
+The model is a linear classifier defined by a weight matrix $A$ and a bias vector $b$. For a given image vector $x$, the output is computed as:
+
+\[
+a = xA + b
+\]
+
+The output vector contains one value for each digit (0--9), and the predicted label is the index of the largest value in this vector.
+
+\subsection*{Helper Functions}
+
+In order to make the later work easier, and to keep structure in the code, we have made helper functions. These consist of a functions to save a network, load a network, basic algebra, evaluating and visualizing the network.
+
+For the \texttt{linear_load} 
+
+\subsection*{Training}
+
+To train the model, we use the mean squared error (MSE) as the cost function. The target label is represented as a vector, where the correct class has value 1 and all others are 0.
+
+Training is done using stochastic gradient descent. The dataset is divided into batches, and for each batch we compute gradients and update the weights and biases. The learning rate was set to 0.1.
+
+The training is implemented in three functions in \texttt{mnist\_io.py}: \texttt{create\_batches} (lines 425--441), \texttt{update} (lines 444--482), and \texttt{learn} (lines 485--533). In \texttt{update}, pixels with value 0 are skipped at line 473 to avoid unnecessary multiplications, since MNIST images are mostly black background. In \texttt{learn}, training indices are batched rather than images directly (lines 514--516) so image-label alignment cannot drift when shuffling, the network is evaluated on a 500-image subset of the test set every 50 batches (lines 519--524), and the best-performing network is saved to disk whenever accuracy improves (lines 527--530).
+
+
+\vspace{20pt}
+\section*{Design Choices}
+
+\subsection*{Pure Python} 
+
+The use of libraries was restricted by the assignment. This made the implementation slower, but helped in understanding how everything works internally.
+    
+\subsection*{Mean squared error} 
+
+Although other loss functions such as cross-entropy are more suitable for classification, MSE was chosen because it is simple and easy to differentiate.
+    
+\subsection*{Batch training}
+Mini-batches were used instead of updating the model for each individual sample, which leads to more stable training.
+    
+\subsection*{Checkpointing} 
+The best-performing model is saved during training to avoid losing good intermediate results.
+
+
+\vspace{20pt}
+\section*{Results}
+
+After training the model, we evaluated it on the full test dataset.
+
+The final performance was:
+\begin{itemize}
+    \item Accuracy: 86.38\%
+    \item Average cost: 0.04
+\end{itemize}
+
+The model is able to correctly classify most digits, although it still makes mistakes on more unclear images. Overall, the results are reasonable for a simple linear model.
+
+\vspace{20pt}
+\section*{Testing}
+
+We implemented several tests in \texttt{tests.py} to verify that the code works correctly, including:
+
+\begin{itemize}
+    \item Images and labels are loaded correctly from the dataset
+    \item Saving and loading the model preserves the data
+    \item The model achieves a reasonable accuracy
+\end{itemize}
+
+The \texttt{create\_batches} test (lines 47--52) calls \texttt{create\_batches(list(range(7)), 3)} and checks that the number of batches is correct (line 49), no values are lost or duplicated (line 50), and the batch sizes follow the expected pattern \texttt{[3, 3, 1]} (line 51).
+
+The \texttt{update} test (lines 54--67) checks that one update step reduces the cost on a single image. The cost is measured before and after the call (lines 63 and 65), and the assertion on line 66 confirms it decreased. This is a stronger check than asserting fixed values, since gradient descent on one sample should always reduce that sample's cost.
+
+The \texttt{learn} test (lines 70--85) runs the full pipeline: 5 epochs, batch size 100, on the 60\,000 training images. The trained network is evaluated on the full test set (line 83) and the assertion on line 84 requires accuracy above 0.7. The threshold is loose because random initialisation makes the exact accuracy unpredictable, but a working linear classifier should comfortably exceed 70\% on MNIST.
+
+In addition, visualizations were added to display sample images, predictions, and learned weights. These are included in the code but commented out in the test file to avoid blocking execution. They are attached in the appendix on page 4.
+
+
+\vspace{20pt}
+\section*{Challenges and Limitations}
+
+There were several challenges during the project:
+
+\begin{itemize}
+    \item The implementation is relatively slow, because all operations are done using Python lists instead of libraries.
+    
+    \item The model is very simple and cannot capture complex patterns in the data.
+    
+    \item Using mean squared error is not ideal for classification tasks, which affects accuracy.
+    
+    \item Implementing and debugging the gradient updates was time consuming.
+\end{itemize}
+
+
+\vspace{20pt}
+\section*{Conclusion}
+
+In this project, we successfully built a linear classifier for digit recognition from scratch. The model has reasonable accuracy and demonstrates the basic principles of machine learning.
+
+While the performance could be improved, the project provided a solid understanding of how such systems work. Possible improvements include using better loss functions, more advanced models, and libraries.
+
+
+\clearpage
+\section*{Appendix: Visualizations}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figure_1.png}
+    \caption{Sample MNIST images.}
+\end{figure}
+ 
+\vspace{20pt}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.05\textwidth, height=0.13\textheight, keepaspectratio]{Figure_2.png}
+    \caption{Model predictions on sample images. Incorrect predictions are marked red.}
+\end{figure}
+ 
+\vspace{20pt}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figure_3.png}
+    \caption{Visualization of learned weights for each digit class.}
+\end{figure}
+
+\end{document}

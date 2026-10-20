@@ -25,17 +25,22 @@ Chaos modus                     :   chaos
 Hostport                        :   hostport
 
 """
+import os
 import sys
 import mouse as gestapo
 import json
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "etc", "config.json")
+
 while True:
     if input("Skip setup? (y/n) ") == "y":
         sys.exit()
+    # defaults, so the config can still be written if slowmo is skipped
+    game, slowmo, slow, smooth = "", False, 0.5, 1.0
     listen = str(input("Button to start choice "))
     if input("Is this the pause button? (y/n) ") == "y":
         print("How long between unpause to choice press? ")
-        pause = int(input())
+        pause = float(input())
     else:
         pause = 0
     update = str(input("Button to update server "))
@@ -76,7 +81,7 @@ while True:
             button_name = input()
             choice_name.append(button_name)
     print("Whats the hostport?")
-    hostport = input()
+    hostport = input().strip().rstrip("/")
     print("Chaos-Modus active?(y/n)")
     if input() == "y":
         chaos = True
@@ -104,6 +109,6 @@ while True:
     print("this u? (y/n)")
     print(config)
     if input() == "y":
-        with open("etc/config.json", "w") as out:
+        with open(CONFIG_PATH, "w") as out:
             json.dump(config, out)
         sys.exit()
